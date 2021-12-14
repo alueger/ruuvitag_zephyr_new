@@ -25,9 +25,7 @@ add_subdirectory(src/bt_handler)
 
 ###############Sensors###############
 add_subdirectory(src/sensor_handler)
-add_subdirectory(src/tmp117_handler)
-add_subdirectory(src/bme280_handler)
-add_subdirectory(src/lis2dh12_handler)
 add_subdirectory(src/battery_handler)
-add_subdirectory(src/shtcx_handler)
-add_subdirectory(src/dps310_handler)
+add_subdirectory_ifdef(CONFIG_TMP117 src/tmp117_handler)
+add_subdirectory_ifdef(CONFIG_BME280 src/bme280_handler)
+add_subdirectory_ifdef(CONFIG_LIS2DH12 src/lis2dh12_handler)
