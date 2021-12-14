@@ -1,17 +1,41 @@
-#ifndef __TMP117_DRIVER_H__
-#define __TMP117_DRIVER_H__
+#ifndef ZEPHYR_DRIVERS_SENSOR_TMP117_TMP117_H_
+#define ZEPHYR_DRIVERS_SENSOR_TMP117_TMP117_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#include <zephyr/types.h>
 #include <kernel.h>
 #include <device.h>
+#include <devicetree.h>
+
 #include <sys/util.h>
 #include <stdint.h>
 #include <drivers/gpio.h>
 #include <drivers/i2c.h>
 #include <string.h>
+
+
+struct tmp117_data {
+	const struct device *bus;
+	const struct device *i2c;
+        const struct tmp117_transfer_function *hw_tf;
+        uint8_t sample_rate;
+	uint8_t resolution;
+	uint8_t scale;
+	uint8_t dsp;
+	uint8_t mode;
+
+        #if DT_INST_NODE_HAS_PROP(0, supplyi2c_gpios)
+	const struct device *supplyi2c_gpio;
+        #endif
+	
+        #ifdef CONFIG_PM_DEVICE
+		enum pm_device_state pm_device_state; /* Current power state */
+	#endif 
+};
+
 
 struct tmp117_sample {
 	int32_t raw_sample;
@@ -29,32 +53,22 @@ struct tmp117_config {
 
 struct tmp117_transfer_function {
 	int (*read_reg)(const struct device *dev, uint8_t reg,
-			uint16_t *val);
+	uint16_t *val);
 	int (*write_reg)(const struct device *dev, uint8_t reg,
-			 uint16_t val);
+	uint16_t val);
 };
 
-struct tmp117_data {
-	const struct device *bus;
-	const struct tmp117_transfer_function *hw_tf;
-	uint8_t sample_rate;
-	uint8_t resolution;
-	uint8_t scale;
-	uint8_t dsp;
-	uint8_t mode;
-};
 
 int tmp117_i2c_init(const struct device *dev);
 
-__subsystem struct tmp117_driver_api {
+struct tmp117_driver_api {
 	int (*soft_reset)(const struct device *dev);
 	int (*sleep)(const struct device *dev);
 	int (*get_sample)(const struct device *dev, struct tmp117_sample *val);
 };
 
-__syscall int tmp117_soft_reset(const struct device *dev);
 
-static inline int z_impl_tmp117_soft_reset(const struct device *dev)
+static int tmp117_soft_reset(const struct device *dev)
 {
 	const struct tmp117_driver_api *api =
 		(const struct tmp117_driver_api *)dev->api;
@@ -62,9 +76,8 @@ static inline int z_impl_tmp117_soft_reset(const struct device *dev)
 	return api->soft_reset(dev);
 }
 
-__syscall int tmp117_sleep(const struct device *dev);
 
-static inline int z_impl_tmp117_sleep(const struct device *dev)
+static inline int tmp117_sleep(const struct device *dev)
 {
 	const struct tmp117_driver_api *api =
 		(const struct tmp117_driver_api *)dev->api;
@@ -72,9 +85,8 @@ static inline int z_impl_tmp117_sleep(const struct device *dev)
 	return api->sleep(dev);
 }
 
-__syscall int tmp117_get_sample(const struct device *dev, struct tmp117_sample *val);
 
-static inline int z_impl_tmp117_get_sample(const struct device *dev,
+static  int tmp117_get_sample(const struct device *dev,
 					    						struct tmp117_sample *val)
 {
 	const struct tmp117_driver_api *api =
@@ -88,6 +100,6 @@ static inline int z_impl_tmp117_get_sample(const struct device *dev,
 }
 #endif
 
-#include <syscalls/tmp117.h>
+//#include <syscalls/tmp117.h>
 
-#endif /* __TMP117_DRIVER_H__ */
+#endif /* ZEPHYR_DRIVERS_SENSOR_TMP117_TMP117_H_*/

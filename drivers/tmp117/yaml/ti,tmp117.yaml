@@ -1,0 +1,21 @@
+# Copyright (c) 2018, NXP
+# SPDX-License-Identifier: Apache-2.0
+
+description: TMP117 Temp sensor
+
+compatible: "ti,tmp117"
+
+include: i2c-device.yaml
+
+properties:
+    alert-gpios:
+      type: phandle-array
+      required: false
+      description: |
+        The alert  signal of the TMP117
+
+    supplyi2c-gpios:
+      type: phandle-array
+      required: false
+      description: |
+        The Supply signal for powering the TMP117
