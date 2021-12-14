@@ -50,11 +50,6 @@ static int set_supply_i2c(const struct device *dev, bool enable)
 		return -EINVAL;
 	}
 
-	/*
-	 * Wakeup pin should be pulled low before initiating
-	 * any I2C transfer.  If it has been tied to GND by
-	 * default, skip this part.
-	 */
 	err = gpio_pin_configure(drv_data->supplyi2c_gpio, SUPPLYI2C_PIN,
                             GPIO_OUTPUT_INACTIVE | DT_INST_GPIO_FLAGS(0, supplyi2c_gpios));
 
@@ -69,25 +64,22 @@ static int set_supply_i2c(const struct device *dev, bool enable)
 		return -EINVAL;
 	}
 	if (enable) {
-	k_busy_wait(100000);        /* t_WAKE = 50 us */
-	drv_data->pm_device_state = PM_DEVICE_STATE_ACTIVE;
-
-
+		k_busy_wait(100000);        /* t_WAKE = 50 us */
+		drv_data->pm_device_state = PM_DEVICE_STATE_ACTIVE;
 		} else {
 		drv_data->pm_device_state = PM_DEVICE_STATE_OFF;
 		k_busy_wait(20);/* t_DWAKE = 20 us */
 	}
+
 	return 0;
 
 	#else
-	
-        static int set_supply_i2c(const struct device *dev, bool enable)
+	static int set_supply_i2c(const struct device *dev, bool enable)
 	{
-        LOG_INF(" NO GPIO Supply PIN! ");
+	LOG_INF(" NO GPIO Supply PIN! ");
 	return 0;
-        }
-
-        #endif
+	}
+	#endif
 }
 #endif /* DT_INST_NODE_HAS_PROP */
 
@@ -167,8 +159,8 @@ static int shtc3_read_words(const struct device *dev, uint16_t cmd, uint16_t *da
 	if (!cfg->clock_stretching) {
 		k_sleep(K_USEC(max_duration_us));
 	}
-        
-        k_sleep(K_USEC(max_duration_us));
+
+
 	status = i2c_read(shtc3_i2c_bus(dev), rx_buf, raw_len,
 			  shtc3_i2c_address(dev));
 	if (status != 0) {
@@ -263,22 +255,19 @@ static const struct sensor_driver_api shtc3_driver_api = {
 };
 
 
-
-
 static int shtc3_init(const struct device *dev)
 {
 	const struct shtc3_config *cfg = dev->config;
-        struct shtc3_data *data = dev->data;
-	
-        uint16_t product_id;
-        int err  =0 ;
-        
-        //pm_device_enable(dev);
+	struct shtc3_data *data = dev->data;
+	uint16_t product_id;
+	int err  =0 ;
 
-        data->pm_device_state = PM_DEVICE_STATE_OFF;
+	//pm_device_enable(dev);
+
+	data->pm_device_state = PM_DEVICE_STATE_OFF;
 
 	err = set_supply_i2c(dev,false);
-        if (err!= 0) {
+	if (err!= 0) {
 		LOG_INF("GPIO Supply Set Error");
 		return -EINVAL;
 	}
@@ -287,8 +276,6 @@ static int shtc3_init(const struct device *dev)
 		LOG_DBG("i2c bus is not ready");
 		return -ENODEV;
 	}
-
-
 
 	k_sleep(K_USEC(SHTC3_POWER_UP_TIME_US));
 	if (cfg->chip == SHTC3) {
