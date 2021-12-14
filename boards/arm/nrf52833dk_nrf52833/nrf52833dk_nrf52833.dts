@@ -148,7 +148,7 @@ arduino_serial: &uart1 {
 		spi-max-frequency = <10000000>;
 		irq-gpios =  <&gpio0 2 GPIO_ACTIVE_HIGH>, <&gpio0 6 GPIO_ACTIVE_HIGH>;
 		label = "LIS2DH12-ACCEL";
-                supply-gpios = <&gpio0 16 GPIO_ACTIVE_LOW>;
+        supply-gpios = <&gpio0 16 GPIO_ACTIVE_LOW>;
 	};
 };
 

@@ -5,7 +5,6 @@
  *
  */
  
- 
  // LA 141221 07:00 
 
 #define DT_DRV_COMPAT ti_tmp117
