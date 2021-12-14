@@ -1,9 +1,9 @@
 # Copyright (c) 2021, Thomas Stranger
 # SPDX-License-Identifier: Apache-2.0
 
-description: Sensirion SHTCx humidity and temperature sensor
+description: Sensirion SHTC3 humidity and temperature sensor
 
-compatible: "sensirion,shtcx"
+compatible: "sensirion,shtc3"
 
 include: i2c-device.yaml
 

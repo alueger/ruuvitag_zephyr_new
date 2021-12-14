@@ -44,6 +44,9 @@ LOG_MODULE_REGISTER(tmp117, CONFIG_TMP117_LOG_LEVEL);
 #define SUPPLYI2C_PIN DT_INST_GPIO_PIN(0, supplyi2c_gpios)
 
 #if DT_INST_NODE_HAS_PROP(0, supplyi2c_gpios)
+
+#define SUPPLYI2C_PIN DT_INST_GPIO_PIN(0, supplyi2c_gpios)
+
 static int set_supply_i2c(const struct device *dev, bool enable)
 	{
 	int err;
@@ -87,6 +90,8 @@ static int set_supply_i2c(const struct device *dev, bool enable)
 	if (enable) {
 	k_busy_wait(50000);        /* t_WAKE = 50 us */
 	drv_data->pm_device_state = PM_DEVICE_STATE_ACTIVE;
+
+
 		} else {
 		drv_data->pm_device_state = PM_DEVICE_STATE_OFF;
 		k_busy_wait(20);/* t_DWAKE = 20 us */
@@ -94,8 +99,14 @@ static int set_supply_i2c(const struct device *dev, bool enable)
 	return 0;
 
 	#else
-	#define set_supplyi2c(...)
-	#endif
+	
+        static int set_supply_i2c(const struct device *dev, bool enable)
+	{
+        LOG_INF(" NO GPIO Supply PIN! ");
+	return 0;
+        }
+
+        #endif
 }
 #endif /* DT_INST_NODE_HAS_PROP */
 
@@ -245,15 +256,18 @@ static int tmp117_init(const struct device *dev)
 
 	data->pm_device_state = PM_DEVICE_STATE_OFF;
 
-	int rc  =0 ;
+	int rc ,err  =0 ;
 
-	set_supply_i2c(dev,true);
+	err = set_supply_i2c(dev,true);
+        if (err!= 0) {
+		LOG_INF("GPIO Supply Set Error");
+		return -EINVAL;
+	}
 
 	/* Bind to the I2C bus that the sensor is connected */
 	data->bus = device_get_binding(cfg->bus_name);
 	if (!data->bus) {
-		LOG_ERR("Cannot bind to %s device!",
-		cfg->bus_name);
+		LOG_ERR("Cannot bind to %s device!",cfg->bus_name);
 		return -EINVAL;
 		}
 
@@ -282,7 +296,7 @@ int tmp117_pm_ctrl(const struct device *dev, uint32_t ctrl_command,
 				ret = tmp117_init(dev);
 			}
 			/* Switching to OFF from any */
-			else if (tmp117_pm_device_state == PM_DEVICE_STATE_OFF) {
+			else if (tmp117_pm_device_state == PM_DEVICE_STATE_ACTIVE) {
 				/* Put the chip into sleep mode */
 				ret = sleep_tmp117(dev);
 				if (ret < 0)

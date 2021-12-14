@@ -3,8 +3,9 @@
 # Copyright (c) 2021 Thomas Stranger
 # SPDX-License-Identifier: Apache-2.0
 
-config SHTCX
-	bool "SHTCX: SHTC1 and SHTC3 Temperature and Humidity Sensor"
+
+menuconfig SHTC3
+	bool "SHTC3 Temperature Sensors"
 	depends on I2C
 	help
-	  Enable driver for SHTC1 and SHTC3 temperature and humidity sensors.
+	  Enable I2C driver for SHTC3 temperature sensor.

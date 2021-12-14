@@ -1,6 +1,5 @@
-if(CONFIG_SHTCX)
+if(CONFIG_SHTC3)
     zephyr_include_directories(.)
     zephyr_library()
-
-    zephyr_library_sources(shtcx.c)
+    zephyr_library_sources(shtc3.c)
 endif()

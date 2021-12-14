@@ -23,11 +23,14 @@ LOG_MODULE_REGISTER(lis2dh12, CONFIG_LIS2DH12_LOG_LEVEL);
 	enum pm_device_state lis2dh12_pm_device_state;
 #endif
 
+
 struct lis2dh12_data lis2dh12_data = {
 	.config.bus_name = DT_INST_BUS_LABEL(0)
 };
 
+
 #if DT_INST_NODE_HAS_PROP(0, supply_gpios)
+
 #define SUPPLY_PIN DT_INST_GPIO_PIN(0, supply_gpios)
 
 static int set_supply_spi(const struct device *dev, bool enable)

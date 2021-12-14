@@ -22,9 +22,9 @@ static bool has_tmp117 = false;
 static bool has_lis2dh12 = false;
 #endif
 
-#ifdef CONFIG_SHTCX
-#include "shtcx_handler.h"
-static bool has_shtcx = false;
+#ifdef CONFIG_SHTC3
+#include "shtc3_handler.h"
+static bool has_shtc3 = false;
 #endif
 
 #ifdef CONFIG_DPS310
@@ -44,12 +44,13 @@ LOG_MODULE_REGISTER(sensor_handler);
 
 #define SNP_TIME	10
 
+/*
 const struct device *sensor_pwr_1;
 const struct device *sensor_pwr_2;
 
 static bool snp1_enabled = false;
 static bool snp2_enabled = false;
-
+*/
 static bool has_adc = false;
 
 static uint16_t acceleration_events = 0;
@@ -90,11 +91,11 @@ static void update_lis2dh12(void){
 }
 #endif
 
-#ifdef CONFIG_SHTCX
-static void update_shtcx(void){
-	shtcx_fetch();
-	sensor_data.temperature = shtcx_get_temp();
-	sensor_data.humidity    = shtcx_get_humidity();
+#ifdef CONFIG_SHTC3
+static void update_shtc3(void){
+	shtc3_fetch();
+	sensor_data.temperature = shtc3_get_temp();
+	sensor_data.humidity    = shtc3_get_humidity();
 	LOG_DBG("Temperature: %d, Humidity: %d",sensor_data.temperature, sensor_data.humidity);
 }
 #endif
@@ -142,9 +143,9 @@ void udpate_sensor_data(void)
 	}
 #endif
 
-#ifdef CONFIG_SHTCX
-	if (has_shtcx){
-		update_shtcx();
+#ifdef CONFIG_SHTC3
+	if (has_shtc3) {
+		update_shtc3();
 	}
 #endif
 
@@ -204,9 +205,9 @@ void sensor_init(void){
 	}
 #endif
  
-#ifdef CONFIG_SHTCX
-	has_shtcx = init_shtcx();
-	if (!has_shtcx) {
+#ifdef CONFIG_SHTC3
+	has_shtc3 = init_shtc3();
+	if (!has_shtc3) {
 		LOG_ERR("Failed to initialize SHTCx\n");
 		flash_red();
 	}

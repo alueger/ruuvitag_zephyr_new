@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 3.20.0)
 # Add external Drivers
 list(APPEND ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_SOURCE_DIR}/drivers/lis2dh12)
 list(APPEND ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_SOURCE_DIR}/drivers/tmp117)
+list(APPEND ZEPHYR_EXTRA_MODULES ${CMAKE_CURRENT_SOURCE_DIR}/drivers/shtc3)
+
 
 # Add the board
 set(BOARD_ROOT ${CMAKE_CURRENT_LIST_DIR})
@@ -29,3 +31,4 @@ add_subdirectory(src/battery_handler)
 add_subdirectory_ifdef(CONFIG_TMP117 src/tmp117_handler)
 add_subdirectory_ifdef(CONFIG_BME280 src/bme280_handler)
 add_subdirectory_ifdef(CONFIG_LIS2DH12 src/lis2dh12_handler)
+add_subdirectory_ifdef(CONFIG_SHTC3 src/shtc3_handler)

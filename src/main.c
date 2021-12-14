@@ -114,6 +114,7 @@ void main(void)
 
 	init_peripherals();
 
+
 	/*
 	 * Enables the filsesystem and mgmt groups that are required to
 	 * enable dfu functionality.

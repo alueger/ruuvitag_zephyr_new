@@ -93,6 +93,7 @@
 		spi-max-frequency = <10000000>;
 		irq-gpios =  <&gpio0 2 GPIO_ACTIVE_HIGH>, <&gpio0 6 GPIO_ACTIVE_HIGH>;
 		label = "LIS2DH12-ACCEL";
+		supply-gpios = <&gpio0 7 GPIO_ACTIVE_LOW>;
 	};
 };
 &i2c1 {
@@ -106,6 +107,15 @@
 		reg = <0x48>;
 		label = "TMP117";
 		alert-gpios = <&gpio0 16 GPIO_ACTIVE_HIGH>;
+		supplyi2c-gpios = <&gpio0 13 GPIO_ACTIVE_LOW>;
+	};
+        	sensirion_shtc3: shtc3@70 {
+		compatible = "sensirion,shtc3";
+		reg = <0x70>;
+		label = "SHTC3";
+		chip = "shtc3";
+		measure-mode = "normal";
+		supplyi2c-gpios= <&gpio0 13 GPIO_ACTIVE_LOW>;
 	};
 };
 
