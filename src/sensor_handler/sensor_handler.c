@@ -59,61 +59,61 @@ static ble_data_t buffer = { .id = {0x99, 0x04}};
 
 
 static void update_battery(void){
-    if(k_uptime_get() - battery_check > 10000){
-        battery_check 	= k_uptime_get();
-        sensor_data.vbatt 			= get_battery_level();
-        LOG_DBG("Battery: %d mV", sensor_data.vbatt);
+	if(k_uptime_get() - battery_check > 10000){
+		battery_check 	= k_uptime_get();
+		sensor_data.vbatt 			= get_battery_level();
+		LOG_DBG("Battery: %d mV", sensor_data.vbatt);
 	}
 }
 
 
 #ifdef CONFIG_BME280
-static void update_bme(void){
-    bme280_fetch();
-    sensor_data.temperature = 	bme280_get_temp();
-    sensor_data.pressure    = 	bme280_get_press();
-    sensor_data.humidity    = 	bme280_get_humidity();
-    LOG_INF("Temperature: %d, Pressure: %d, Humidity: %d", 
-                        sensor_data.temperature, 
-                        sensor_data.pressure, 
-                        sensor_data.humidity);
+	static void update_bme(void){
+	bme280_fetch();
+	sensor_data.temperature = 	bme280_get_temp();
+	sensor_data.pressure    = 	bme280_get_press();
+	sensor_data.humidity    = 	bme280_get_humidity();
+	LOG_INF("Temperature: %d, Pressure: %d, Humidity: %d", 
+						sensor_data.temperature, 
+						sensor_data.pressure, 
+						sensor_data.humidity);
 }
 #endif
 
 #ifdef CONFIG_LIS2DH12
 static void update_lis2dh12(void){
-    lis2dh12_fetch();
-    sensor_data.x = lis2dh12_get(0);
-    sensor_data.y = lis2dh12_get(1);
-    sensor_data.z = lis2dh12_get(2);
-    LOG_DBG("X: %d, Y: %d, Z: %d", sensor_data.x, sensor_data.y, sensor_data.z);
+	lis2dh12_fetch();
+	sensor_data.x = lis2dh12_get(0);
+	sensor_data.y = lis2dh12_get(1);
+	sensor_data.z = lis2dh12_get(2);
+	LOG_DBG("X: %d, Y: %d, Z: %d", sensor_data.x, sensor_data.y, sensor_data.z);
 }
 #endif
 
 #ifdef CONFIG_SHTCX
 static void update_shtcx(void){
-    shtcx_fetch();
-    sensor_data.temperature = shtcx_get_temp();
-    sensor_data.humidity    = shtcx_get_humidity();
-    LOG_DBG("Temperature: %d, Humidity: %d",sensor_data.temperature, sensor_data.humidity);
+	shtcx_fetch();
+	sensor_data.temperature = shtcx_get_temp();
+	sensor_data.humidity    = shtcx_get_humidity();
+	LOG_DBG("Temperature: %d, Humidity: %d",sensor_data.temperature, sensor_data.humidity);
 }
 #endif
 
 
 #ifdef CONFIG_DPS310
 static void update_dps310(void){
-    dps310_fetch();
-    sensor_data.temperature = dps310_get_temp();
-    LOG_DBG("Temperature: %d", sensor_data.temperature);
+	dps310_fetch();
+	sensor_data.temperature = dps310_get_temp();
+	LOG_DBG("Temperature: %d", sensor_data.temperature);
 }
 #endif
 
 
 #ifdef CONFIG_TMP117
 static void update_tmp117(void){
-    tmp117_fetch();
-    sensor_data.temperature = tmp117_get_temp();
-    LOG_DBG("Temperature: %d", sensor_data.temperature);
+	tmp117_fetch();
+	sensor_data.temperature = tmp117_get_temp();
+	LOG_DBG("Temperature: %d", sensor_data.temperature);
 }
 #endif
 
@@ -127,47 +127,47 @@ static void package_sensor_data(void)
 
 void udpate_sensor_data(void)
 {
-    if (has_adc){
-        update_battery();
-    }
+	if (has_adc){
+		update_battery();
+	}
 #ifdef CONFIG_BME280
-    if (has_bme280){
-        update_bme();
-    }
+	if (has_bme280){
+		update_bme();
+	}
 #endif
 
 #ifdef CONFIG_LIS2DH12
-    if (has_lis2dh12){
-        update_lis2dh12();
-    }
+	if (has_lis2dh12){
+		update_lis2dh12();
+	}
 #endif
 
 #ifdef CONFIG_SHTCX
-    if (has_shtcx){
-        update_shtcx();
-    }
+	if (has_shtcx){
+		update_shtcx();
+	}
 #endif
 
 #ifdef CONFIG_DPS310 
-    if (has_dps310){
+	if (has_dps310){
 	update_dps310();
-    }
+	}
 #endif
 
 #ifdef CONFIG_TMP117 
-    if (has_tmp117){
+	if (has_tmp117){
 	update_tmp117();
-    }
+	}
 #endif
 
 	package_sensor_data();
 }
 
 void sensor_init(void){
-    k_msleep(50);
-       
+	k_msleep(50);
 
-    has_adc = init_adc();
+
+	has_adc = init_adc();
 	if (!has_adc) {
 		LOG_ERR("Failed to initialize ADC\n");
 		flash_red();
@@ -205,13 +205,11 @@ void sensor_init(void){
 #endif
  
 #ifdef CONFIG_SHTCX
-        has_shtcx = init_shtcx();
+	has_shtcx = init_shtcx();
 	if (!has_shtcx) {
 		LOG_ERR("Failed to initialize SHTCx\n");
 		flash_red();
 	}
 #endif
-
-
 
 }
