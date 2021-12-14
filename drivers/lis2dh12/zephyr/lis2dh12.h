@@ -26,12 +26,12 @@ struct lis2dh12_sample {
 
 struct lis2dh12_device_config {
 	const char *bus_name;
-	lis2dh12_op_md_t mode; //!< Resolution, bits. 8, 10, or 12.
-    lis2dh12_fs_t scale;         //!< Scale, gravities. 2, 4, 8 or 16.
-    lis2dh12_odr_t samplerate;   //!< Sample rate, 1 ... 200, or custom values for higher.
-	lis2dh12_temp_en_t temp_en;
-	lis2dh12_fm_t fifo_mode;
-	uint8_t fifo_wm;
+        lis2dh12_op_md_t mode; //!< Resolution, bits. 8, 10, or 12.
+        lis2dh12_fs_t scale;         //!< Scale, gravities. 2, 4, 8 or 16.
+        lis2dh12_odr_t samplerate;   //!< Sample rate, 1 ... 200, or custom values for higher.
+        lis2dh12_temp_en_t temp_en;
+        lis2dh12_fm_t fifo_mode;
+        uint8_t fifo_wm;
 };
 
 struct lis2dh12_data {
@@ -42,8 +42,19 @@ struct lis2dh12_data {
 #if DT_ANY_INST_ON_BUS_STATUS_OKAY(spi)
 	struct spi_cs_control cs_ctrl;
 #endif /* DT_ANY_INST_ON_BUS_STATUS_OKAY(spi) */
+
+#if DT_INST_NODE_HAS_PROP(0, supply_gpios)
+        const struct device *supply_gpio;
+#endif
+
+
+#ifdef CONFIG_PM_DEVICE
+   enum pm_device_state pm_device_state; /* Current power state */
+#endif 
+
 };
 
+/************************************/
 
 int lis2dh12_spi_init(const struct device *dev);
 

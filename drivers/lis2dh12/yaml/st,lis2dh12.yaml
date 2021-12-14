@@ -1,0 +1,16 @@
+# Copyright (c) 2018, NXP
+# SPDX-License-Identifier: Apache-2.0
+
+description: LIS2DH 3-axis accelerometer
+
+compatible: "st,lis2dh12"
+
+include: spi-device.yaml
+
+properties:
+
+    supply-gpios:
+      type: phandle-array
+      required: false
+      description: |
+        The Supply signal for powering the TMP117

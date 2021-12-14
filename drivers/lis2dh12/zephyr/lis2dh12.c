@@ -18,9 +18,76 @@
 LOG_MODULE_REGISTER(lis2dh12, CONFIG_LIS2DH12_LOG_LEVEL);
 #include "lis2dh12.h"
 
+#ifdef CONFIG_PM_DEVICE
+	#include <pm/device_runtime.h>
+	enum pm_device_state lis2dh12_pm_device_state;
+#endif
+
 struct lis2dh12_data lis2dh12_data = {
 	.config.bus_name = DT_INST_BUS_LABEL(0)
 };
+
+#if DT_INST_NODE_HAS_PROP(0, supply_gpios)
+#define SUPPLY_PIN DT_INST_GPIO_PIN(0, supply_gpios)
+
+static int set_supply_spi(const struct device *dev, bool enable)
+{
+	int err;
+	struct lis2dh12_data *drv_data = dev->data;
+
+	*drv_data = (struct lis2dh12_data){ 0 };
+	drv_data->bus = device_get_binding(DT_INST_BUS_LABEL(0));
+	
+        if (drv_data->bus == NULL) {
+		LOG_INF("Failed to get pointer to %s device!",DT_INST_BUS_LABEL(0));
+		return -EINVAL;
+	}
+
+  #if DT_INST_NODE_HAS_PROP(0, supply_gpios)
+	drv_data->supply_gpio = device_get_binding(DT_INST_GPIO_LABEL(0, supply_gpios));
+	if (drv_data->supply_gpio == NULL) {
+		LOG_INF("Failed to get pointer to Supply device: %s",
+			DT_INST_GPIO_LABEL(0, supply_gpios));
+		return -EINVAL;
+	}
+
+	/*
+	 * Wakeup pin should be pulled low before initiating
+	 * any I2C transfer.  If it has been tied to GND by
+	 * default, skip this part.
+	 */
+	err = gpio_pin_configure(drv_data->supply_gpio, SUPPLY_PIN,
+                            GPIO_OUTPUT_INACTIVE | DT_INST_GPIO_FLAGS(0, supply_gpios));
+
+	if (err!= 0){
+	LOG_INF("GPIO  Supply Config Error");
+	return -EINVAL;
+	}
+
+	err = gpio_pin_set(drv_data->supply_gpio, SUPPLY_PIN, enable);
+	if (err!= 0){
+		LOG_INF("GPIO Supply Set Error");
+		return -EINVAL;
+		}
+	if (enable) {
+          k_busy_wait(500); /* t_WAKE = 50 us */
+	
+          //drv_data->pm_device_state = PM_DEVICE_STATE_ACTIVE;
+	
+        } else {
+		//drv_data->pm_device_state = PM_DEVICE_STATE_OFF;
+		
+                k_busy_wait(20); /* t_DWAKE = 20 us */
+		}
+
+	return 0;
+
+	#else
+	#define set_supply(...)
+	#endif
+}
+#endif /* DT_INST_NODE_HAS_PROP */
+
 
 static float rawToCelsius(int16_t raw_temp)
 {
@@ -237,6 +304,12 @@ static int lis2dh12_config()
 static int lis2dh12_init_interface(const struct device *dev)
 {
 	struct lis2dh12_data *lis2dh12 = dev->data;
+        int err;
+	err= set_supply_spi(dev, true); // true = on, false = off
+	if (err!= 0){
+		LOG_INF("GPIO  Supply setting Error");
+		return -EINVAL;
+		}
 
 	lis2dh12->bus = device_get_binding(lis2dh12->config.bus_name);
 	if (!lis2dh12->bus) {
@@ -245,6 +318,11 @@ static int lis2dh12_init_interface(const struct device *dev)
 	}
 
 	lis2dh12_spi_init(dev);
+	return 0;
+}
+
+static int lis2dh12_sleep(const struct device *dev)
+{
 	return 0;
 }
 
@@ -298,6 +376,47 @@ static int lis2dh12_init(const struct device *dev)
 	return 0;
 }
 
+/***************************************/
+#ifdef CONFIG_PM_DEVICE
+int lis2dh12_pm_ctrl(const struct device *dev, uint32_t ctrl_command,
+		enum pm_device_state *state)
+{
+	
+        struct lis2dh12_data *data = dev->data;
+	int ret = 0;
+
+	/* Set power state */
+	if (ctrl_command == PM_DEVICE_STATE_SET) {
+		if (*state != data->pm_device_state) {
+			/* Switching from OFF to any */
+				if (data->pm_device_state == PM_DEVICE_STATE_OFF) {
+				/* Re-initialize the chip */
+				ret = lis2dh12_init(dev);
+			}
+			/* Switching to OFF from any */
+			else if (lis2dh12_pm_device_state == PM_DEVICE_STATE_OFF) {
+				/* Put the chip into sleep mode */
+				ret = lis2dh12_sleep(dev);
+				if (ret < 0)
+					LOG_DBG("CTRL_MEAS write failed: %d",
+						ret);
+				}
+			/* Store the new state */
+			if (!ret)
+				data->pm_device_state = lis2dh12_pm_device_state;
+		}
+	}
+	/* Get power state */
+	else {
+		__ASSERT_NO_MSG(ctrl_command == PM_DEVICE_STATE_GET);
+		*state = data->pm_device_state;
+	}
+
+	return ret;
+}
+#endif /* CONFIG_PM_DEVICE */
+
+
 #ifdef CONFIG_USERSPACE
 static inline void z_vrfy_lis2dh12_get_temp_sample(const struct device *dev, struct lis2dh12_sample *val)
 {
@@ -325,6 +444,6 @@ static inline void z_vrfy_lis2dh12_get_sample(const struct device *dev, struct l
 #endif /* CONFIG_USERSPACE */
 
 
-DEVICE_DT_INST_DEFINE(0, lis2dh12_init, NULL,
+DEVICE_DT_INST_DEFINE(0, lis2dh12_init, lis2dh12_pm_ctrl,
 	     &lis2dh12_data, NULL, POST_KERNEL,
 	     CONFIG_LIS2DH12_INIT_PRIORITY, &lis2dh12_driver_api);
