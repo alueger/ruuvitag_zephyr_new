@@ -252,7 +252,7 @@ static int tmp117_init(const struct device *dev)
 {
 	const struct tmp117_config *cfg = dev->config;
 	struct tmp117_data *data = to_data(dev);
-	pm_device_enable(dev);
+	//pm_device_enable(dev);
 
 	data->pm_device_state = PM_DEVICE_STATE_OFF;
 

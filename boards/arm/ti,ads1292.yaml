@@ -1,0 +1,27 @@
+# Copyright (c) 2018, NXP
+# SPDX-License-Identifier: Apache-2.0
+
+description: ADS129x Low-Power ECG
+
+compatible: "ti,ads1292"
+
+include: spi-device.yaml
+
+properties:
+    int-gpios:
+      type: phandle-array
+      required: false
+      description: |
+        The  DRDY signal of ADS1292
+  
+    supply-gpios:
+      type: phandle-array
+      required: false
+      description: |
+        The Supply signal powers the ADS1292
+
+    start-gpios:
+      type: phandle-array
+      required: false
+      description: |
+        The Start signal for the ADS1292 
