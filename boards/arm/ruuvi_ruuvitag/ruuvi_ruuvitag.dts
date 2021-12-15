@@ -106,8 +106,8 @@
 		compatible = "ti,tmp117";
 		reg = <0x48>;
 		label = "TMP117";
-		alert-gpios = <&gpio0 16 GPIO_ACTIVE_HIGH>;
-		supplyi2c-gpios = <&gpio0 19 GPIO_ACTIVE_LOW>;
+		//alert-gpios = <&gpio0 16 GPIO_ACTIVE_HIGH>;
+		supplyi2c-gpios = <&gpio0 16 GPIO_ACTIVE_HIGH>;
 	};
         	sensirion_shtc3: shtc3@70 {
 		compatible = "sensirion,shtc3";
@@ -115,7 +115,7 @@
 		label = "SHTC3";
 		chip = "shtc3";
 		measure-mode = "normal";
-		supplyi2c-gpios= <&gpio0 17 GPIO_ACTIVE_LOW>;
+		supplyi2c-gpios= <&gpio0 16 GPIO_ACTIVE_HIGH>;
 	};
 };
 
