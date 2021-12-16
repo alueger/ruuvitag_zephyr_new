@@ -60,7 +60,7 @@ static int set_supply_spi(const struct device *dev, bool enable)
 	 * default, skip this part.
 	 */
 	err = gpio_pin_configure(drv_data->supply_gpio, SUPPLY_PIN,
-                            GPIO_OUTPUT_INACTIVE | DT_INST_GPIO_FLAGS(0, supply_gpios));
+          GPIO_DS_DFLT_HIGH  |  GPIO_OUTPUT_INACTIVE | DT_INST_GPIO_FLAGS(0, supply_gpios));
 
 	if (err!= 0){
 	LOG_INF("GPIO  Supply Config Error");

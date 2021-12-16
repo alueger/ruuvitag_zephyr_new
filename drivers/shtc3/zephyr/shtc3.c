@@ -51,7 +51,7 @@ static int set_supply_i2c(const struct device *dev, bool enable)
 	}
 
 	err = gpio_pin_configure(drv_data->supplyi2c_gpio, SUPPLYI2C_PIN,
-                            GPIO_OUTPUT_INIT_LOW | DT_INST_GPIO_FLAGS(0, supplyi2c_gpios));
+                GPIO_DS_DFLT_HIGH  |  GPIO_OUTPUT_INIT_LOW | DT_INST_GPIO_FLAGS(0, supplyi2c_gpios));
 
 	if (err!= 0){
 		LOG_INF("GPIO  Supply Config Error");

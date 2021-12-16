@@ -15,7 +15,6 @@
 #include <logging/log.h>
 LOG_MODULE_REGISTER(button_handler, CONFIG_RUUVITAG_LOG_LEVEL);
 
-
 const struct device *button;
 
 void button_int_setup(struct gpio_callback *handle, gpio_callback_handler_t cbh){
