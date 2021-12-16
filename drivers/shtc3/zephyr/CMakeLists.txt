@@ -1,0 +1,5 @@
+if(CONFIG_SHTC3)
+    zephyr_include_directories(.)
+    zephyr_library()
+    zephyr_library_sources(shtc3.c)
+endif()

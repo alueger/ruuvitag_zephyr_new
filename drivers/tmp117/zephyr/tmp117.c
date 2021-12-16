@@ -5,6 +5,7 @@
  *
  */
  
+ 
  // LA 141221 07:00 
 
 #define DT_DRV_COMPAT ti_tmp117
@@ -71,8 +72,9 @@ static int set_supply_i2c(const struct device *dev, bool enable)
 	 * any I2C transfer.  If it has been tied to GND by
 	 * default, skip this part.
 	 */
-	err = gpio_pin_configure(drv_data->supplyi2c_gpio, SUPPLYI2C_PIN,
-                            GPIO_OUTPUT_INACTIVE | DT_INST_GPIO_FLAGS(0, supplyi2c_gpios));
+	
+        err = gpio_pin_configure(drv_data->supplyi2c_gpio, SUPPLYI2C_PIN,
+                           GPIO_DS_DFLT_HIGH  | GPIO_OUTPUT_LOW | DT_INST_GPIO_FLAGS(0, supplyi2c_gpios));
 
 	if (err!= 0){
 		LOG_INF("GPIO  Supply Config Error");

@@ -23,11 +23,14 @@ LOG_MODULE_REGISTER(lis2dh12, CONFIG_LIS2DH12_LOG_LEVEL);
 	enum pm_device_state lis2dh12_pm_device_state;
 #endif
 
+
 struct lis2dh12_data lis2dh12_data = {
 	.config.bus_name = DT_INST_BUS_LABEL(0)
 };
 
+
 #if DT_INST_NODE_HAS_PROP(0, supply_gpios)
+
 #define SUPPLY_PIN DT_INST_GPIO_PIN(0, supply_gpios)
 
 static int set_supply_spi(const struct device *dev, bool enable)
@@ -57,7 +60,7 @@ static int set_supply_spi(const struct device *dev, bool enable)
 	 * default, skip this part.
 	 */
 	err = gpio_pin_configure(drv_data->supply_gpio, SUPPLY_PIN,
-                            GPIO_OUTPUT_INACTIVE | DT_INST_GPIO_FLAGS(0, supply_gpios));
+          GPIO_DS_DFLT_HIGH  |  GPIO_OUTPUT_INACTIVE | DT_INST_GPIO_FLAGS(0, supply_gpios));
 
 	if (err!= 0){
 	LOG_INF("GPIO  Supply Config Error");
