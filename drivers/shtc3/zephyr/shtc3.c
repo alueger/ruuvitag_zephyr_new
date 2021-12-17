@@ -64,7 +64,7 @@ static int set_supply_i2c(const struct device *dev, bool enable)
 		return -EINVAL;
 	}
 	if (enable) {
-		k_busy_wait(100000);        /* t_WAKE = 50 us */
+		k_busy_wait(200000);        /* t_WAKE = 50 us */
 		drv_data->pm_device_state = PM_DEVICE_STATE_ACTIVE;
 		} else {
 		drv_data->pm_device_state = PM_DEVICE_STATE_OFF;
@@ -91,6 +91,8 @@ static const uint16_t measure_cmd[2][2] = {
 
 /* measure_wait_us[shtc3_chip][MEASURE_MODE] */
 static const uint16_t measure_wait_us[2][2] = {
+
+
 	/* shtc3: 12.1ms, 0.8ms */
 	{ 1210, 800 }, /* shtc3 */
 	/* shtc1: 14.4ms, 0.94ms */
@@ -131,14 +133,15 @@ static void shtc3_humidity_from_raw(uint16_t raw, struct sensor_value *val)
 	val->val2 = (tmp % 0x10000) * 15625U / 1024;
 }
 
+
 static int shtc3_write_command(const struct device *dev, uint16_t cmd)
 {
 	uint8_t tx_buf[2];
 
 	sys_put_be16(cmd, tx_buf);
-	return i2c_write(shtc3_i2c_bus(dev), tx_buf, sizeof(tx_buf),
-			 shtc3_i2c_address(dev));
+	return i2c_write(shtc3_i2c_bus(dev), tx_buf, sizeof(tx_buf), shtc3_i2c_address(dev));
 }
+
 
 static int shtc3_read_words(const struct device *dev, uint16_t cmd, uint16_t *data,
 		     uint16_t num_words, uint16_t max_duration_us)
@@ -159,10 +162,9 @@ static int shtc3_read_words(const struct device *dev, uint16_t cmd, uint16_t *da
 	if (!cfg->clock_stretching) {
 		k_sleep(K_USEC(max_duration_us));
 	}
-
-
-	status = i2c_read(shtc3_i2c_bus(dev), rx_buf, raw_len,
-			  shtc3_i2c_address(dev));
+       
+      k_busy_wait(100000); 
+	status = i2c_read(shtc3_i2c_bus(dev), rx_buf, raw_len, shtc3_i2c_address(dev));
 	if (status != 0) {
 		LOG_DBG("Failed to read data");
 		return -EIO;
@@ -183,20 +185,22 @@ static int shtc3_read_words(const struct device *dev, uint16_t cmd, uint16_t *da
 
 static int shtc3_sleep(const struct device *dev)
 {
-	if (shtc3_write_command(dev, SHTC3_CMD_SLEEP) < 0) {
+	 k_busy_wait(100000);
+        if (shtc3_write_command(dev, SHTC3_CMD_SLEEP) < 0) {
 		return -EIO;
 	}
-
+        k_busy_wait(10000);  
 	return 0;
 }
 
 static int shtc3_wakeup(const struct device *dev)
 {
-	if (shtc3_write_command(dev, SHTC3_CMD_WAKEUP)) {
+	 k_busy_wait(100000);
+        if (shtc3_write_command(dev, SHTC3_CMD_WAKEUP)) {
 		return -EIO;
 	}
 
-	k_sleep(K_USEC(100));
+	k_sleep(K_USEC(30000));
 	return 0;
 }
 
@@ -207,13 +211,13 @@ static int shtc3_sample_fetch(const struct device *dev,
 	const struct shtc3_config *cfg = dev->config;
 
 	__ASSERT_NO_MSG(chan == SENSOR_CHAN_ALL);
-
+        k_busy_wait(100000);
 	if (cfg->chip == SHTC3) {
 		if (shtc3_wakeup(dev)) {
 			return -EIO;
 		}
 	}
-
+        k_busy_wait(100000);
 	if (shtc3_read_words(dev,
 			     measure_cmd[cfg->measure_mode][cfg->clock_stretching],
 			     (uint16_t *)&data->sample, 2,
@@ -221,7 +225,7 @@ static int shtc3_sample_fetch(const struct device *dev,
 		LOG_DBG("Failed read measurements!");
 		return -EIO;
 	}
-
+        k_busy_wait(100000);
 	if (cfg->chip == SHTC3) {
 		if (shtc3_sleep(dev)) {
 			LOG_DBG("Failed to initiate sleep");
@@ -267,54 +271,62 @@ static int shtc3_init(const struct device *dev)
 
 	data->pm_device_state = PM_DEVICE_STATE_OFF;
 
-	err = set_supply_i2c(dev,true);
+#ifc DT_INST_NODE_HAS_PROP(0, supplyi2c_gpios)
+	err = set_supply_i2c(dev,true);  //true = on, false = off
 	if (err!= 0) {
 		LOG_INF("GPIO Supply Set Error");
 		return -EINVAL;
 	}
+        k_busy_wait(10000);  
+#endif
 
 	if (device_is_ready(cfg->bus) ==  0) {
 		LOG_DBG("i2c bus is not ready");
 		return -ENODEV;
 	}
-
-	k_sleep(K_USEC(SHTC3_POWER_UP_TIME_US));
+        k_busy_wait(10000);  
+	//k_sleep(K_USEC(SHTC3_POWER_UP_TIME_US)); 
 	if (cfg->chip == SHTC3) {
 		if (shtc3_wakeup(dev)) {
 			LOG_ERR("Wakeup failed");
 			return -EIO;
 		}
 	}
+            k_busy_wait(100000);   
+      
 
 	if (shtc3_write_command(dev, SHTC3_CMD_SOFT_RESET) < 0) {
 		LOG_ERR("soft reset failed");
 		return -EIO;
 	}
 
-	k_sleep(K_USEC(SHTC3_SOFT_RESET_TIME_US));
-
+	//k_sleep(K_USEC(SHTC3_SOFT_RESET_TIME_US+100 ));
+       k_busy_wait(100000);
 	if (shtc3_read_words(dev, SHTC3_CMD_READ_ID, &product_id, 1, 0) < 0) {
 		LOG_ERR("Failed to read product id!");
 		return -EIO;
 	}
-
+       
 	if (cfg->chip == SHTC1) {
 		if ((product_id & SHTC1_ID_MASK) != SHTC1_ID_VALUE) {
 			LOG_ERR("Device is not a SHTC1");
 			return -EINVAL;
 		}
 	}
-	if (cfg->chip == SHTC3) {
+	 
+        if (cfg->chip == SHTC3) {
 		if ((product_id & SHTC3_ID_MASK) != SHTC3_ID_VALUE) {
 			LOG_ERR("Device is not a SHTC3");
 			return -EINVAL;
 		}
-		shtc3_sleep(dev);
+		
+                shtc3_sleep(dev);
+             
 	}
 
-	LOG_DBG("Clock-stretching enabled: %d", cfg->clock_stretching);
-	LOG_DBG("Measurement mode: %d", cfg->measure_mode);
-	LOG_DBG("Init SHTC3");
+	LOG_INF("Clock-stretching enabled: %d", cfg->clock_stretching);
+	LOG_INF("Measurement mode: %d", cfg->measure_mode);
+	LOG_INF("Init SHTC3");
 	return 0;
 }
 

@@ -21,7 +21,7 @@
 
 #define SHTC3_POWER_UP_TIME_US		240U
 /* Soft reset time is 230us for shtc1 and 240us for shtc3 */
-#define SHTC3_SOFT_RESET_TIME_US	240U
+#define SHTC3_SOFT_RESET_TIME_US	240U //
 
 #define SHTC3_MAX_READ_LEN		6
 #define SHTC3_WORD_LEN			2
