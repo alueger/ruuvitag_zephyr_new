@@ -271,7 +271,7 @@ static int shtc3_init(const struct device *dev)
 
 	data->pm_device_state = PM_DEVICE_STATE_OFF;
 
-#ifc DT_INST_NODE_HAS_PROP(0, supplyi2c_gpios)
+#if DT_INST_NODE_HAS_PROP(0, supplyi2c_gpios)
 	err = set_supply_i2c(dev,true);  //true = on, false = off
 	if (err!= 0) {
 		LOG_INF("GPIO Supply Set Error");
